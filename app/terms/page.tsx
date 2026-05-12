@@ -10,7 +10,7 @@ export default function TermsPage() {
         borderBottom: '1px solid rgba(61,35,20,0.12)',
       }}>
         <Link href="/" style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 600, color: '#3D2314', textDecoration: 'none' }}>
-          🌿 Mother&apos;s Side Market
+          🌿 Mother Side Market
         </Link>
         <Link href="/" style={{ color: '#3D2314', fontSize: '13px' }}>
           Back to home

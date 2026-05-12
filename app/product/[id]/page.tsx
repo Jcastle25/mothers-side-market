@@ -85,7 +85,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       <div style={{ padding: '48px 24px', maxWidth: '1120px', margin: '0 auto' }}>
         <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px', flexWrap: 'wrap', gap: '12px' }}>
           <Link href="/" style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 600, color: '#3D2314', textDecoration: 'none' }}>
-            🌿 Mother's Side Market
+            🌿 Mother Side Market
           </Link>
           <Link href="/browse" style={{ fontSize: '13px', color: '#3D2314', textDecoration: 'none' }}>
             Back to browse

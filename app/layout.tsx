@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mother's Side Market",
+  title: "Mother Side Market",
   description: "A marketplace for homeschool and family digital and physical resources.",
 };
 

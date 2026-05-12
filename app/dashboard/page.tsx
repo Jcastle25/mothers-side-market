@@ -81,7 +81,7 @@ export default async function DashboardPage() {
         borderBottom: '1px solid rgba(61,35,20,0.12)',
       }}>
         <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 600, color: '#3D2314' }}>
-          🌿 Mother&apos;s Side Market
+          🌿 Mother Side Market
         </div>
         <form action={logout}>
           <button type="submit" style={{ padding: '8px 18px', borderRadius: '100px', border: '1px solid rgba(61,35,20,0.22)', background: 'transparent', color: '#3D2314', cursor: 'pointer', fontSize: '12px' }}>

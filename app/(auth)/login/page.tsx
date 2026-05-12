@@ -19,7 +19,7 @@ export default function LoginPage() {
     <main style={{ fontFamily: "'Jost', sans-serif", background: '#FAF6F0', minHeight: '100vh', color: '#3D2314' }}>
       <nav style={NAV_STYLE}>
         <Link href="/" style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 600, color: '#3D2314', textDecoration: 'none' }}>
-          🌿 Mother&apos;s Side Market
+          🌿 Mother Side Market
         </Link>
         <div style={{ fontSize: '13px', color: '#7A4A2E' }}>
           New here?{' '}

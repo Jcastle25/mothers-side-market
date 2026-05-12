@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Mother's Side Market",
+  title: "Mother Side Market",
   description: "Resources made by moms who get it",
 };
 
@@ -23,7 +23,7 @@ export default function Home() {
         position: "sticky", top: 0, zIndex: 100
       }}>
         <div style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 600, color: "#3D2314" }}>
-          🌿 Mother's Side Market
+          🌿 Mother Side Market
         </div>
         <div style={{ display: "flex", gap: "28px" }}>
           {["Browse", "Creators", "Categories", "Free resources"].map(link => (
@@ -151,7 +151,7 @@ export default function Home() {
       {/* CTA */}
       <section style={{ margin: "0 48px 56px", background: "rgba(61,35,20,0.04)", border: "1px solid rgba(61,35,20,0.22)", borderRadius: "20px", padding: "52px 40px", textAlign: "center" }}>
         <h2 style={{ fontFamily: "Georgia, serif", fontSize: "36px", fontWeight: 500, color: "#3D2314", marginBottom: "10px" }}>Ready to share your resources?</h2>
-        <p style={{ fontSize: "14px", color: "#7A4A2E", marginBottom: "28px" }}>Join hundreds of homeschool creators already earning on Mother's Side Market.</p>
+        <p style={{ fontSize: "14px", color: "#7A4A2E", marginBottom: "28px" }}>Join hundreds of homeschool creators already earning on Mother Side Market.</p>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "11px" }}>
           <button style={{ padding: "13px 30px", borderRadius: "100px", border: "none", background: "#3D2314", color: "#FAF6F0", fontSize: "13px", cursor: "pointer" }}>Create your storefront</button>
           <button style={{ padding: "13px 30px", borderRadius: "100px", border: "1px solid rgba(61,35,20,0.22)", background: "transparent", color: "#3D2314", fontSize: "13px", cursor: "pointer" }}>Browse first</button>
@@ -161,7 +161,7 @@ export default function Home() {
 
       {/* FOOTER */}
       <footer style={{ borderTop: "1px solid rgba(61,35,20,0.12)", padding: "28px 48px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#FAF6F0" }}>
-        <div style={{ fontFamily: "Georgia, serif", fontSize: "15px", color: "#3D2314" }}>🌿 Mother's Side Market</div>
+        <div style={{ fontFamily: "Georgia, serif", fontSize: "15px", color: "#3D2314" }}>🌿 Mother Side Market</div>
         <div style={{ display: "flex", gap: "22px" }}>
           {[
             { label: "About", href: "#" },
@@ -174,7 +174,7 @@ export default function Home() {
             <a key={link.label} href={link.href} style={{ fontSize: "11px", color: "#7A4A2E", textDecoration: "none" }}>{link.label}</a>
           ))}
         </div>
-        <div style={{ fontSize: "11px", color: "#7A4A2E" }}>© 2025 Mother's Side Market</div>
+        <div style={{ fontSize: "11px", color: "#7A4A2E" }}>© 2025 Mother Side Market</div>
       </footer>
 
     </main>
