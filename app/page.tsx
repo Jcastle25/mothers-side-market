@@ -30,8 +30,8 @@ export default function Home() {
           </span>
         </div>
         <div style={{ display: "flex", gap: "28px" }}>
-          {["Browse", "Creators", "Categories", "Free resources"].map(link => (
-            <a key={link} href="#" style={{ fontSize: "12px", color: "#7A4A2E", textDecoration: "none" }}>{link}</a>
+          {[{label: "Browse", href: "/browse"}, {label: "Categories", href: "/browse"}].map(link => (
+            <a key={link.label} href={link.href} style={{ fontSize: "12px", color: "#7A4A2E", textDecoration: "none" }}>{link.label}</a>
           ))}
         </div>
         <div style={{ display: "flex", gap: "9px" }}>
@@ -83,7 +83,7 @@ export default function Home() {
       <section style={{ padding: "0 48px 56px" }}>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "22px" }}>
           <h2 style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 500, color: "#3D2314" }}>Browse by category</h2>
-          <a href="#" style={{ fontSize: "12px", color: "#7A4A2E", textDecoration: "none" }}>View all →</a>
+          <a href="/browse" style={{ fontSize: "12px", color: "#7A4A2E", textDecoration: "none" }}>View all →</a>
         </div>
         <div style={{ display: "flex", gap: "9px", flexWrap: "wrap" }}>
           {["Homeschool resources", "Lesson plans", "Toddler activities", "Parenting tips", "Printables", "Snack & meal ideas", "Organization"].map(cat => (
@@ -173,10 +173,10 @@ export default function Home() {
         </div>
         <div style={{ display: "flex", gap: "22px" }}>
           {[
-            { label: "About", href: "#" },
-            { label: "Browse", href: "#" },
-            { label: "Sell", href: "#" },
-            { label: "Pricing", href: "#" },
+            
+            { label: "Browse", href: "/browse" },
+            { label: "Sell", href: "/dashboard" },
+            { label: "Pricing", href: "/terms" },
             { label: "Privacy", href: "/privacy" },
             { label: "Terms", href: "/terms" }
           ].map(link => (
