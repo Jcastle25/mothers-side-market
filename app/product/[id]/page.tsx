@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import MarketLogo from '@/components/Logo'
+import BuyNowButton from '@/components/BuyNowButton'
 import { createClient } from '@/lib/supabase/server'
 
 function formatCents(value: number | null | undefined) {
@@ -29,6 +31,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
   // Try to fetch creator separately if product found
   let creatorName = 'Creator'
+  
   if (product && product.creator_id) {
     const { data: creator } = await supabase
       .from('creators')
@@ -84,8 +87,11 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     <main style={{ fontFamily: "'Jost', sans-serif", background: '#FAF6F0', minHeight: '100vh', color: '#3D2314' }}>
       <div style={{ padding: '48px 24px', maxWidth: '1120px', margin: '0 auto' }}>
         <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px', flexWrap: 'wrap', gap: '12px' }}>
-          <Link href="/" style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 600, color: '#3D2314', textDecoration: 'none' }}>
-            🌿 Mother Side Market
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+            <MarketLogo size={32} />
+            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '22px', fontWeight: 600, color: '#3D2314' }}>
+              Mother Side Market
+            </span>
           </Link>
           <Link href="/browse" style={{ fontSize: '13px', color: '#3D2314', textDecoration: 'none' }}>
             Back to browse
@@ -181,13 +187,9 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                   Download
                 </button>
               ) : (
-                <button
-                  type="button"
-                  disabled={outOfStock}
-                  style={{ width: '100%', padding: '14px 20px', borderRadius: '100px', border: 'none', background: outOfStock ? 'rgba(61,35,20,0.2)' : '#3D2314', color: '#FAF6F0', cursor: outOfStock ? 'not-allowed' : 'pointer', fontSize: '14px', fontWeight: 600 }}
-                >
+                <BuyNowButton productId={product.id} disabled={outOfStock}>
                   {outOfStock ? 'Sold out' : 'Buy now'}
-                </button>
+                </BuyNowButton>
               )}
             </div>
 

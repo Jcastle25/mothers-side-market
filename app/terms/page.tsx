@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import MarketLogo from '@/components/Logo'
 
 export default function TermsPage() {
   return (
@@ -10,7 +11,10 @@ export default function TermsPage() {
         borderBottom: '1px solid rgba(61,35,20,0.12)',
       }}>
         <Link href="/" style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 600, color: '#3D2314', textDecoration: 'none' }}>
-          🌿 Mother Side Market
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <MarketLogo size={32} />
+            Mother Side Market
+          </div>
         </Link>
         <Link href="/" style={{ color: '#3D2314', fontSize: '13px' }}>
           Back to home

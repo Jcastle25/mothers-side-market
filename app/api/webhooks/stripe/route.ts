@@ -58,6 +58,7 @@ export async function POST(request: Request) {
     ]).select('id').single()
 
     if (orderError || !insertOrder) {
+      console.error('[Webhook] Order insert failed:', orderError)
       return new NextResponse('Failed to record order', { status: 500 })
     }
 

@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     mode: 'payment',
     payment_method_types: ['card'],
     line_items: [lineItem],
-    success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/?checkout=success`,
+    success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/account/purchases?checkout=success`,
     cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/checkout?canceled=true`,
     metadata: {
       product_id: product.id,
@@ -84,16 +84,26 @@ export async function POST(request: Request) {
     .limit(1)
     .single()
 
+  // Only add Stripe Connect transfer if creator has connected account
+  // If not, payment goes to platform account and we handle splits manually later
   if (creator?.stripe_account_id) {
     sessionPayload.payment_intent_data = {
       application_fee_amount: Math.round(product.price * 0.1),
       transfer_data: {
         destination: creator.stripe_account_id,
       },
+      on_behalf_of: creator.stripe_account_id,
     }
   }
 
-  const session = await stripe.checkout.sessions.create(sessionPayload)
-
-  return NextResponse.json({ sessionId: session.id })
+  try {
+    const session = await stripe.checkout.sessions.create(sessionPayload)
+    return NextResponse.json({ url: session.url })
+  } catch (error) {
+    console.error('[Checkout API] Stripe session creation error:', error)
+    return NextResponse.json(
+      { error: 'Failed to create checkout session. Please try again.' },
+      { status: 500 }
+    )
+  }
 }

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useActionState } from 'react'
+import MarketLogo from '@/components/Logo'
 import { createProduct } from '@/app/actions/products'
 
 const INPUT_STYLE: React.CSSProperties = {
@@ -30,8 +31,11 @@ export default function UploadProductPage() {
         background: 'rgba(250,246,240,0.94)',
         borderBottom: '1px solid rgba(61,35,20,0.12)',
       }}>
-        <Link href="/dashboard" style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 600, color: '#3D2314', textDecoration: 'none' }}>
-          🌿 Mother&apos;s Side Market
+        <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+          <MarketLogo size={32} />
+          <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '22px', fontWeight: 600, color: '#3D2314' }}>
+            Mother Side Market
+          </span>
         </Link>
         <Link href="/dashboard" style={{ color: '#3D2314', fontSize: '13px' }}>
           Back to dashboard

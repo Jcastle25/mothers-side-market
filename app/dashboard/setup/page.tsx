@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react'
 import Link from 'next/link'
+import MarketLogo from '@/components/Logo'
 import { setupCreator } from '@/app/actions/setup'
 
 const INPUT_STYLE: React.CSSProperties = {
@@ -34,8 +35,11 @@ export default function SetupPage() {
         background: 'rgba(250,246,240,0.94)',
         borderBottom: '1px solid rgba(61,35,20,0.12)',
       }}>
-        <Link href="/" style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 600, color: '#3D2314', textDecoration: 'none' }}>
-          🌿 Mother&apos;s Side Market
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+          <MarketLogo size={32} />
+          <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '22px', fontWeight: 600, color: '#3D2314' }}>
+            Mother Side Market
+          </span>
         </Link>
         <div style={{ fontSize: '13px', color: '#7A4A2E' }}>
           Already have an account?{' '}

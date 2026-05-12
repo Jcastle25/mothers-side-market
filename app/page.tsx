@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import MarketLogo from '@/components/Logo'
 
 export const metadata: Metadata = {
   title: "Mother Side Market",
@@ -22,8 +23,11 @@ export default function Home() {
         borderBottom: "1px solid rgba(61,35,20,0.12)",
         position: "sticky", top: 0, zIndex: 100
       }}>
-        <div style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 600, color: "#3D2314" }}>
-          🌿 Mother Side Market
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <MarketLogo size={32} />
+          <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '22px', fontWeight: 600, color: '#3D2314' }}>
+            Mother Side Market
+          </span>
         </div>
         <div style={{ display: "flex", gap: "28px" }}>
           {["Browse", "Creators", "Categories", "Free resources"].map(link => (
@@ -161,7 +165,12 @@ export default function Home() {
 
       {/* FOOTER */}
       <footer style={{ borderTop: "1px solid rgba(61,35,20,0.12)", padding: "28px 48px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#FAF6F0" }}>
-        <div style={{ fontFamily: "Georgia, serif", fontSize: "15px", color: "#3D2314" }}>🌿 Mother Side Market</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <MarketLogo size={24} />
+          <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '15px', fontWeight: 600, color: '#3D2314' }}>
+            Mother Side Market
+          </span>
+        </div>
         <div style={{ display: "flex", gap: "22px" }}>
           {[
             { label: "About", href: "#" },
@@ -174,7 +183,12 @@ export default function Home() {
             <a key={link.label} href={link.href} style={{ fontSize: "11px", color: "#7A4A2E", textDecoration: "none" }}>{link.label}</a>
           ))}
         </div>
-        <div style={{ fontSize: "11px", color: "#7A4A2E" }}>© 2025 Mother Side Market</div>
+        <div style={{ fontSize: "11px", color: "#7A4A2E", display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <MarketLogo size={24} />
+          <span style={{ fontFamily: "'Cormorant Garamond', serif", color: '#3D2314', fontWeight: 600 }}>
+            © 2025 Mother Side Market
+          </span>
+        </div>
       </footer>
 
     </main>

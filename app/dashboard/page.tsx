@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { logout } from '@/app/actions/auth'
+import MarketLogo from '@/components/Logo'
 
 type Creator = {
   id: string
@@ -80,8 +81,11 @@ export default async function DashboardPage() {
         background: 'rgba(250,246,240,0.94)',
         borderBottom: '1px solid rgba(61,35,20,0.12)',
       }}>
-        <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 600, color: '#3D2314' }}>
-          🌿 Mother Side Market
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <MarketLogo size={32} />
+          <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '22px', fontWeight: 600, color: '#3D2314' }}>
+            Mother Side Market
+          </span>
         </div>
         <form action={logout}>
           <button type="submit" style={{ padding: '8px 18px', borderRadius: '100px', border: '1px solid rgba(61,35,20,0.22)', background: 'transparent', color: '#3D2314', cursor: 'pointer', fontSize: '12px' }}>

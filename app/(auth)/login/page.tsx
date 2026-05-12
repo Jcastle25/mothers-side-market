@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react'
 import Link from 'next/link'
+import MarketLogo from '@/components/Logo'
 import { login } from '@/app/actions/auth'
 
 const NAV_STYLE: React.CSSProperties = {
@@ -18,8 +19,11 @@ export default function LoginPage() {
   return (
     <main style={{ fontFamily: "'Jost', sans-serif", background: '#FAF6F0', minHeight: '100vh', color: '#3D2314' }}>
       <nav style={NAV_STYLE}>
-        <Link href="/" style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 600, color: '#3D2314', textDecoration: 'none' }}>
-          🌿 Mother Side Market
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+          <MarketLogo size={32} />
+          <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '22px', fontWeight: 600, color: '#3D2314' }}>
+            Mother Side Market
+          </span>
         </Link>
         <div style={{ fontSize: '13px', color: '#7A4A2E' }}>
           New here?{' '}
