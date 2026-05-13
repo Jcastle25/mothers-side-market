@@ -52,16 +52,13 @@ export default function Home() {
           Lesson plans, printables, activity guides &amp; meal ideas — crafted by real homeschool parents and shared with families like yours.
         </p>
         <div style={{ display: "flex", gap: "12px", marginBottom: "54px" }}>
-          <button style={{ padding: "13px 30px", borderRadius: "100px", border: "none", background: "#3D2314", color: "#FAF6F0", fontSize: "13px", cursor: "pointer" }}>Browse resources</button>
-          <button style={{ padding: "13px 30px", borderRadius: "100px", border: "1px solid rgba(61,35,20,0.22)", background: "transparent", color: "#3D2314", fontSize: "13px", cursor: "pointer" }}>Start selling →</button>
+          <a href="/browse" style={{ padding: "13px 30px", borderRadius: "100px", border: "none", background: "#3D2314", color: "#FAF6F0", fontSize: "13px", cursor: "pointer", textDecoration: "none", display: "inline-block" }}>Browse resources</a>
+          <a href="/dashboard" style={{ padding: "13px 30px", borderRadius: "100px", border: "1px solid rgba(61,35,20,0.22)", background: "transparent", color: "#3D2314", fontSize: "13px", cursor: "pointer", textDecoration: "none", display: "inline-block" }}>Start selling →</a>
         </div>
-        <div style={{ display: "flex", gap: "38px" }}>
-          {[["2,400+", "Resources"], ["340", "Creators"], ["18k", "Families"]].map(([num, label]) => (
-            <div key={label}>
-              <div style={{ fontFamily: "Georgia, serif", fontSize: "30px", fontWeight: 600, color: "#3D2314", lineHeight: 1 }}>{num}</div>
-              <div style={{ fontSize: "10px", letterSpacing: "0.09em", color: "#7A4A2E", textTransform: "uppercase", marginTop: "3px" }}>{label}</div>
-            </div>
-          ))}
+        <div style={{ display: "flex", alignItems: "center", gap: "14px", padding: "14px 20px", border: "1px solid rgba(61,35,20,0.18)", borderRadius: "100px", background: "rgba(200,150,90,0.08)", maxWidth: "fit-content" }}>
+          <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#C8965A", flexShrink: 0 }}></span>
+          <span style={{ fontSize: "12px", letterSpacing: "0.06em", color: "#3D2314", textTransform: "uppercase", fontWeight: 500 }}>Founding Creators Wanted</span>
+          <span style={{ fontSize: "12px", color: "#7A4A2E" }}>— first 50 get permanent badge</span>
         </div>
       </section>
 
@@ -96,7 +93,7 @@ export default function Home() {
       <section style={{ padding: "0 48px 56px" }}>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "22px" }}>
           <h2 style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 500, color: "#3D2314" }}>Popular right now</h2>
-          <a href="#" style={{ fontSize: "12px", color: "#7A4A2E", textDecoration: "none" }}>See all →</a>
+          <a href="/browse" style={{ fontSize: "12px", color: "#7A4A2E", textDecoration: "none" }}>See all →</a>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "16px" }}>
           {[
@@ -158,7 +155,7 @@ export default function Home() {
         <p style={{ fontSize: "14px", color: "#7A4A2E", marginBottom: "28px" }}>Join hundreds of homeschool creators already earning on Mother Side Market.</p>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "11px" }}>
           <button style={{ padding: "13px 30px", borderRadius: "100px", border: "none", background: "#3D2314", color: "#FAF6F0", fontSize: "13px", cursor: "pointer" }}>Create your storefront</button>
-          <button style={{ padding: "13px 30px", borderRadius: "100px", border: "1px solid rgba(61,35,20,0.22)", background: "transparent", color: "#3D2314", fontSize: "13px", cursor: "pointer" }}>Browse first</button>
+          <a href="/browse" style={{ padding: "13px 30px", borderRadius: "100px", border: "1px solid rgba(61,35,20,0.22)", background: "transparent", color: "#3D2314", fontSize: "13px", cursor: "pointer", textDecoration: "none", display: "inline-block" }}>Browse first</a>
         </div>
         <p style={{ fontSize: "11px", color: "#7A4A2E", marginTop: "14px" }}>$9.99/month · 10% per sale · Cancel anytime</p>
       </section>
