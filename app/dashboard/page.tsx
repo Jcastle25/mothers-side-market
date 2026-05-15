@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { logout } from '@/app/actions/auth'
 import MarketLogo from '@/components/Logo'
+import ConnectStripeButton from './connect-stripe-button'
 
 type Creator = {
   id: string
@@ -183,9 +184,7 @@ export default async function DashboardPage() {
                   {creator.stripe_account_id ? 'Your Stripe account is set up to receive payments.' : 'Connect your Stripe account to start receiving payments from sales.'}
                 </div>
               </div>
-              {!creator.stripe_account_id && (
-                <button style={{ padding: '10px 20px', borderRadius: '100px', background: '#3D2314', color: '#FAF6F0', border: 'none', cursor: 'pointer', fontSize: '13px' }}>Connect Stripe</button>
-              )}
+              {!creator.stripe_account_id && <ConnectStripeButton />}
             </div>
           </div>
         </section>
