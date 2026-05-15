@@ -79,16 +79,24 @@ export async function POST(request: Request) {
 
   const { data: creator } = await supabase
     .from('creators')
-    .select('stripe_account_id')
+    .select('stripe_account_id, fee_override_percent')
     .eq('id', product.creator_id)
     .limit(1)
     .single()
 
-  // Only add Stripe Connect transfer if creator has connected account
-  // If not, payment goes to platform account and we handle splits manually later
+  // Get platform fee: use creator override if set, otherwise global setting
+  const { data: platformSettings } = await supabase
+    .from('platform_settings')
+    .select('platform_fee_percent')
+    .eq('id', 1)
+    .single()
+
+  const feePercent = creator?.fee_override_percent ?? platformSettings?.platform_fee_percent ?? 10
+  const applicationFee = Math.round(product.price * feePercent / 100)
+
   if (creator?.stripe_account_id) {
     sessionPayload.payment_intent_data = {
-      application_fee_amount: Math.round(product.price * 0.1),
+      application_fee_amount: applicationFee,
       transfer_data: {
         destination: creator.stripe_account_id,
       },

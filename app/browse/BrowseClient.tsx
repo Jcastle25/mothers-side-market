@@ -40,7 +40,7 @@ const ACTIVE_BUTTON_STYLE: React.CSSProperties = {
   ...BUTTON_STYLE,
   background: '#3D2314',
   color: '#FAF6F0',
-  borderColor: '#3D2314',
+  border: '1px solid #3D2314',
 }
 
 export type BrowseProduct = {
@@ -50,6 +50,7 @@ export type BrowseProduct = {
   price: number
   product_type: string
   creator_name: string
+  creator_badges: string[]
 }
 
 export default function BrowseClient({ initialProducts }: { initialProducts: BrowseProduct[] }) {
@@ -130,6 +131,15 @@ export default function BrowseClient({ initialProducts }: { initialProducts: Bro
                     <div>
                       <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 600, color: '#3D2314' }}>{product.title}</div>
                       <div style={{ fontSize: '12px', color: '#7A4A2E', marginTop: '4px' }}>{product.creator_name || 'Creator'}</div>
+                      {product.creator_badges.length > 0 && (
+                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '6px' }}>
+                          {product.creator_badges.map(badge => (
+                            <span key={badge} style={{ padding: '2px 8px', borderRadius: '100px', fontSize: '10px', fontWeight: 600, background: 'rgba(200,150,90,0.2)', color: '#8B5E2A', letterSpacing: '0.04em' }}>
+                              {badge}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>

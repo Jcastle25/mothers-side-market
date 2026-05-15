@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 
 export type AuthState =
   | { error?: string; message?: string }
@@ -48,13 +49,26 @@ export async function login(_state: AuthState, formData: FormData): Promise<Auth
 
   const supabase = await createClient()
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) {
     return { error: error.message }
   }
 
-  redirect('/dashboard')
+  // Check if account is blocked
+  const db = createServiceClient()
+  const { data: userRecord } = await db
+    .from('users')
+    .select('is_blocked')
+    .eq('id', authData.user.id)
+    .single()
+
+  if (userRecord?.is_blocked) {
+    await supabase.auth.signOut()
+    return { error: 'Your account has been suspended. Contact support for help.' }
+  }
+
+  redirect('/account')
 }
 
 export async function logout() {

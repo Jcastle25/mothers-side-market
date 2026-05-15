@@ -1,29 +1,44 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 
 export type ProductActionState = { error?: string; message?: string } | undefined
 
-async function uploadAsset(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  file: File,
-  pathPrefix: string
-): Promise<string> {
+async function uploadImage(file: File, pathPrefix: string): Promise<string> {
+  const service = createServiceClient()
   const fileExt = file.name.split('.').pop() || 'bin'
   const fileName = `${pathPrefix}/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
-  const { data: uploadData, error: uploadError } = await supabase.storage
+  const { data: uploadData, error: uploadError } = await service.storage
     .from('product-images')
     .upload(fileName, file, { upsert: true })
 
   if (uploadError || !uploadData) {
-    throw new Error('Failed to upload file to storage.')
+    console.error('[uploadImage] Supabase error:', uploadError)
+    throw new Error(uploadError?.message || 'Failed to upload image to storage.')
   }
 
-  const { data: { publicUrl } } = supabase.storage
+  const { data: { publicUrl } } = service.storage
     .from('product-images')
     .getPublicUrl(fileName)
 
   return publicUrl
+}
+
+async function uploadDigitalFile(file: File, userId: string): Promise<string> {
+  const service = createServiceClient()
+  const fileExt = file.name.split('.').pop() || 'bin'
+  const filePath = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
+  const { data: uploadData, error: uploadError } = await service.storage
+    .from('product-files')
+    .upload(filePath, file, { upsert: true })
+
+  if (uploadError || !uploadData) {
+    console.error('[uploadDigitalFile] Supabase error:', uploadError)
+    throw new Error(uploadError?.message || 'Failed to upload digital file to storage.')
+  }
+
+  return filePath
 }
 
 export async function createProduct(_state: ProductActionState, formData: FormData): Promise<ProductActionState> {
@@ -91,33 +106,38 @@ export async function createProduct(_state: ProductActionState, formData: FormDa
 
   const { data: creator, error: creatorError } = await supabase
     .from('creators')
-    .select('id')
+    .select('id, stripe_account_id')
     .eq('user_id', user.id)
     .limit(1)
     .single()
 
   if (creatorError || !creator) {
     return {
-      error:
-        'Creator profile not found. Complete your creator onboarding before uploading products.',
+      error: 'Creator profile not found. Complete your creator onboarding before uploading products.',
     }
+  }
+
+  if (isPublished && !creator.stripe_account_id) {
+    return { error: 'You must connect your Stripe account before publishing products. Go to your dashboard to connect Stripe.' }
   }
 
   let fileUrl: string | null = null
   if (productType === 'digital' && productFile) {
     try {
-      fileUrl = await uploadAsset(supabase, productFile, `products/${user.id}/files`)
-    } catch (error) {
-      return { error: 'Failed to upload the digital product file.' }
+      fileUrl = await uploadDigitalFile(productFile, user.id)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unknown error'
+      return { error: `Failed to upload the digital product file: ${msg}` }
     }
   }
 
   for (const imageFile of previewFileEntries) {
     try {
-      const imageUrl = await uploadAsset(supabase, imageFile, `products/${user.id}/previews`)
+      const imageUrl = await uploadImage(imageFile, `products/${user.id}/previews`)
       previewImages.push(imageUrl)
-    } catch (error) {
-      return { error: 'Failed to upload one of the preview images.' }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unknown error'
+      return { error: `Failed to upload preview image: ${msg}` }
     }
   }
 
