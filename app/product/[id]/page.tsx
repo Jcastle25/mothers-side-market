@@ -98,7 +98,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           </Link>
         </nav>
 
-        <section style={{ display: 'grid', gridTemplateColumns: '1.4fr 0.8fr', gap: '32px' }}>
+        <section className="product-grid" style={{ display: 'grid', gridTemplateColumns: '1.4fr 0.8fr', gap: '32px' }}>
           <div>
             <div style={{ display: 'grid', gap: '20px' }}>
               <div style={{ display: 'grid', gap: '16px' }}>
@@ -241,20 +241,12 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       </div>
 
       <style>{`
-        @media (max-width: 980px) {
-          section[style] {
-            grid-template-columns: 1fr !important;
-          }
+        @media (max-width: 860px) {
+          .product-grid { grid-template-columns: 1fr !important; }
+          .product-grid aside { order: -1; }
         }
-
-        @media (max-width: 720px) {
-          main > div {
-            padding: 32px 18px !important;
-          }
-
-          h1 {
-            font-size: 32px !important;
-          }
+        @media (max-width: 640px) {
+          .product-grid h1 { font-size: 30px !important; }
         }
       `}</style>
     </main>

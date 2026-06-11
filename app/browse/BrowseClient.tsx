@@ -67,12 +67,20 @@ export default function BrowseClient({ initialProducts }: { initialProducts: Bro
 
   return (
     <main style={{ fontFamily: "'Jost', sans-serif", background: '#FAF6F0', color: '#3D2314', minHeight: '100vh' }}>
-      <div style={{ padding: '72px 24px 48px', maxWidth: '1280px', margin: '0 auto' }}>
+      <style>{`
+        .browse-wrap { padding: 72px 24px 48px; max-width: 1280px; margin: 0 auto; }
+        .browse-h1 { font-family: Georgia, serif; font-size: 42px; font-weight: 500; margin-bottom: 14px; }
+        @media (max-width: 640px) {
+          .browse-wrap { padding: 40px 16px 32px; }
+          .browse-h1 { font-size: 26px; }
+        }
+      `}</style>
+      <div className="browse-wrap">
         <header style={{ marginBottom: '32px' }}>
           <div style={{ fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#C8965A', marginBottom: '12px' }}>
             ● Browse marketplace
           </div>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '42px', fontWeight: 500, marginBottom: '14px' }}>
+          <h1 className="browse-h1">
             Explore digital and physical homeschool products
           </h1>
           <p style={{ fontSize: '15px', color: '#7A4A2E', maxWidth: '760px', lineHeight: 1.75 }}>
