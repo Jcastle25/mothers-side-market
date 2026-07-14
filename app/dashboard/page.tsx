@@ -27,7 +27,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ stripe?: string }>
+  searchParams: Promise<{ stripe?: string; sub?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -93,7 +93,9 @@ export default async function DashboardPage({
   const freeUntil = (creator as any).subscription_free_until
   if (freeUntil && new Date(freeUntil) > new Date()) subActive = true
 
-  const { stripe: stripeParam, sub: subParam } = await searchParams
+  const params = await searchParams
+  const stripeParam = params.stripe
+  const subParam = params.sub
 
   const totalProducts = products?.length || 0
 
