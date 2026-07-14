@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { logout } from '@/app/actions/auth'
 import MarketLogo from '@/components/Logo'
 import ConnectStripeButton from './connect-stripe-button'
+import SubscribeButton from './subscribe-button'
 import Stripe from 'stripe'
 
 type Creator = {
@@ -35,7 +36,7 @@ export default async function DashboardPage({
 
   const { data: creator } = await supabase
     .from('creators')
-    .select('id, name, stripe_account_id, stripe_sub_id, plan_type')
+    .select('id, name, stripe_account_id, stripe_sub_id, plan_type, subscription_free_until')
     .eq('user_id', user.id)
     .single()
 
@@ -76,7 +77,23 @@ export default async function DashboardPage({
     }
   }
 
-  const { stripe: stripeParam } = await searchParams
+  // Check subscription status
+  let subActive = false
+  let subCancelled = false
+  if (creator.stripe_sub_id) {
+    try {
+      const sub = await stripe.subscriptions.retrieve(creator.stripe_sub_id)
+      subActive = sub.status === 'active' || sub.status === 'trialing'
+      subCancelled = sub.status === 'canceled' || sub.status === 'unpaid'
+    } catch {
+      subCancelled = true
+    }
+  }
+  // Respect free subscription granted by admin
+  const freeUntil = (creator as any).subscription_free_until
+  if (freeUntil && new Date(freeUntil) > new Date()) subActive = true
+
+  const { stripe: stripeParam, sub: subParam } = await searchParams
 
   const totalProducts = products?.length || 0
 
@@ -109,20 +126,30 @@ export default async function DashboardPage({
       </nav>
 
       <div className="dash-wrap">
-        {/* Stripe banners */}
+        {/* Banners */}
         {stripeParam === 'success' && (
-          <div style={{ marginBottom: '28px', padding: '16px 20px', borderRadius: '12px', background: 'rgba(61,35,20,0.08)', border: '1px solid rgba(61,35,20,0.2)', fontSize: '14px', color: '#3D2314', fontWeight: 500 }}>
+          <div style={{ marginBottom: '20px', padding: '16px 20px', borderRadius: '12px', background: 'rgba(61,35,20,0.08)', border: '1px solid rgba(61,35,20,0.2)', fontSize: '14px', color: '#3D2314', fontWeight: 500 }}>
             ✓ Stripe account connected — you're set up to receive payments!
           </div>
         )}
         {stripeParam === 'incomplete' && (
-          <div style={{ marginBottom: '28px', padding: '16px 20px', borderRadius: '12px', background: 'rgba(200,150,90,0.15)', border: '1px solid rgba(200,150,90,0.4)', fontSize: '14px', color: '#8B5E2A', fontWeight: 500 }}>
+          <div style={{ marginBottom: '20px', padding: '16px 20px', borderRadius: '12px', background: 'rgba(200,150,90,0.15)', border: '1px solid rgba(200,150,90,0.4)', fontSize: '14px', color: '#8B5E2A', fontWeight: 500 }}>
             ⚠ Your Stripe setup isn't complete yet. Click "Finish setup" below to continue.
           </div>
         )}
         {stripeParam === 'error' && (
-          <div style={{ marginBottom: '28px', padding: '16px 20px', borderRadius: '12px', background: 'rgba(139,37,0,0.08)', border: '1px solid rgba(139,37,0,0.2)', fontSize: '14px', color: '#8B2500', fontWeight: 500 }}>
+          <div style={{ marginBottom: '20px', padding: '16px 20px', borderRadius: '12px', background: 'rgba(139,37,0,0.08)', border: '1px solid rgba(139,37,0,0.2)', fontSize: '14px', color: '#8B2500', fontWeight: 500 }}>
             Something went wrong with Stripe. Please try connecting again.
+          </div>
+        )}
+        {subParam === 'success' && (
+          <div style={{ marginBottom: '20px', padding: '16px 20px', borderRadius: '12px', background: 'rgba(61,35,20,0.08)', border: '1px solid rgba(61,35,20,0.2)', fontSize: '14px', color: '#3D2314', fontWeight: 500 }}>
+            ✓ Subscription active — you can now publish products!
+          </div>
+        )}
+        {subParam === 'cancelled' && (
+          <div style={{ marginBottom: '20px', padding: '16px 20px', borderRadius: '12px', background: 'rgba(200,150,90,0.15)', border: '1px solid rgba(200,150,90,0.4)', fontSize: '14px', color: '#8B5E2A', fontWeight: 500 }}>
+            Subscription not completed. Subscribe below to start selling.
           </div>
         )}
 
@@ -220,10 +247,33 @@ export default async function DashboardPage({
 
         {/* Subscription */}
         <section>
-          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 500, color: '#3D2314', marginBottom: '20px' }}>Your seller subscription</h2>
+          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 500, color: '#3D2314', marginBottom: '20px' }}>Seller subscription</h2>
           <div style={{ padding: '24px', borderRadius: '16px', background: '#fff', border: '1px solid rgba(61,35,20,0.12)' }}>
-            <div style={{ fontSize: '16px', fontWeight: 500, color: '#3D2314', marginBottom: '4px' }}>$9.99/month</div>
-            <div style={{ fontSize: '13px', color: '#7A4A2E' }}>All sellers pay this fee. Buyers pay nothing.</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                  <div style={{ fontSize: '16px', fontWeight: 500, color: '#3D2314' }}>
+                    {subActive ? 'Subscription active' : 'Subscribe to sell'}
+                  </div>
+                  {subActive && (
+                    <span style={{ padding: '2px 10px', borderRadius: '100px', fontSize: '11px', fontWeight: 600, background: 'rgba(61,35,20,0.08)', color: '#3D2314' }}>
+                      ✓ Active
+                    </span>
+                  )}
+                  {subCancelled && (
+                    <span style={{ padding: '2px 10px', borderRadius: '100px', fontSize: '11px', fontWeight: 600, background: 'rgba(139,37,0,0.1)', color: '#8B2500' }}>
+                      Cancelled
+                    </span>
+                  )}
+                </div>
+                <div style={{ fontSize: '13px', color: '#7A4A2E' }}>
+                  {subActive
+                    ? '$9.99/month · Cancel anytime from your Stripe billing portal.'
+                    : 'Pay $9.99/month to list and sell products. Buyers pay nothing to browse.'}
+                </div>
+              </div>
+              {!subActive && <SubscribeButton />}
+            </div>
           </div>
         </section>
       </div>

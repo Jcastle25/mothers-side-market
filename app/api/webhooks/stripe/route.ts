@@ -22,8 +22,31 @@ export async function POST(request: Request) {
     return new NextResponse('Webhook signature mismatch', { status: 400 })
   }
 
+  if (event.type === 'customer.subscription.deleted') {
+    const subscription = event.data.object as Stripe.Subscription
+    const creatorId = subscription.metadata?.creator_id
+    if (creatorId) {
+      const db = createServiceClient()
+      await db.from('creators').update({ stripe_sub_id: null, plan_type: 'free' }).eq('id', creatorId)
+    }
+    return NextResponse.json({ received: true })
+  }
+
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
+
+    // Subscription purchase
+    if (session.mode === 'subscription') {
+      const creatorId = session.metadata?.creator_id
+      const subscriptionId = typeof session.subscription === 'string' ? session.subscription : session.subscription?.id
+      if (creatorId && subscriptionId) {
+        const db = createServiceClient()
+        await db.from('creators').update({ stripe_sub_id: subscriptionId, plan_type: 'paid' }).eq('id', creatorId)
+      }
+      return NextResponse.json({ received: true })
+    }
+
+    // Product purchase
     const productId = session.metadata?.product_id as string | undefined
     const buyerId = session.metadata?.buyer_id as string | undefined
 
