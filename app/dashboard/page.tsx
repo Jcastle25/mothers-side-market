@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { logout } from '@/app/actions/auth'
 import MarketLogo from '@/components/Logo'
 import ConnectStripeButton from './connect-stripe-button'
+import Stripe from 'stripe'
 
 type Creator = {
   id: string
@@ -20,20 +21,18 @@ type Product = {
   category: string
 }
 
-type Stats = {
-  total_earnings: number
-  this_month_earnings: number
-  total_sales: number
-  total_products: number
-}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ stripe?: string }>
+}) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
 
-  // Fetch creator profile
   const { data: creator } = await supabase
     .from('creators')
     .select('id, name, stripe_account_id, stripe_sub_id, plan_type')
@@ -41,7 +40,6 @@ export default async function DashboardPage() {
     .single()
 
   if (!creator) {
-    // If no creator profile, redirect to setup or show message
     return (
       <main style={{ fontFamily: "'Jost', sans-serif", background: '#FAF6F0', minHeight: '100vh', color: '#3D2314' }}>
         <div style={{ padding: '64px 48px', textAlign: 'center' }}>
@@ -59,32 +57,47 @@ export default async function DashboardPage() {
     )
   }
 
-  // Fetch products
   const { data: products } = await supabase
     .from('products')
     .select('id, title, is_published, price, category')
     .eq('creator_id', creator.id)
     .order('created_at', { ascending: false })
 
-  // Fetch stats (placeholders for now)
-  const stats: Stats = {
-    total_earnings: 0,
-    this_month_earnings: 0,
-    total_sales: 0,
-    total_products: products?.length || 0,
+  // Check real Stripe account status
+  let stripeConnected = false
+  let stripeIncomplete = false
+  if (creator.stripe_account_id) {
+    try {
+      const account = await stripe.accounts.retrieve(creator.stripe_account_id)
+      stripeConnected = !!(account.details_submitted && account.charges_enabled && account.payouts_enabled)
+      stripeIncomplete = account.details_submitted && !stripeConnected
+    } catch {
+      // account may not exist yet
+    }
   }
+
+  const { stripe: stripeParam } = await searchParams
+
+  const totalProducts = products?.length || 0
 
   return (
     <main style={{ fontFamily: "'Jost', sans-serif", background: '#FAF6F0', minHeight: '100vh', color: '#3D2314' }}>
-      <nav style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 48px', height: '66px',
-        background: 'rgba(250,246,240,0.94)',
-        borderBottom: '1px solid rgba(61,35,20,0.12)',
-      }}>
+      <style>{`
+        .dash-nav { display: flex; align-items: center; justify-content: space-between; padding: 0 48px; height: 66px; background: rgba(250,246,240,0.94); border-bottom: 1px solid rgba(61,35,20,0.12); }
+        .dash-wrap { padding: 64px 48px; }
+        .dash-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 48px; }
+        @media (max-width: 640px) {
+          .dash-nav { padding: 0 16px; }
+          .dash-nav-title { display: none; }
+          .dash-wrap { padding: 32px 16px; }
+          .dash-header h1 { font-size: 28px !important; }
+        }
+      `}</style>
+
+      <nav className="dash-nav">
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <MarketLogo size={32} />
-          <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '22px', fontWeight: 600, color: '#3D2314' }}>
+          <span className="dash-nav-title" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '22px', fontWeight: 600, color: '#3D2314' }}>
             Mother Side Market
           </span>
         </div>
@@ -95,57 +108,104 @@ export default async function DashboardPage() {
         </form>
       </nav>
 
-      <div style={{ padding: '64px 48px' }}>
+      <div className="dash-wrap">
+        {/* Stripe banners */}
+        {stripeParam === 'success' && (
+          <div style={{ marginBottom: '28px', padding: '16px 20px', borderRadius: '12px', background: 'rgba(61,35,20,0.08)', border: '1px solid rgba(61,35,20,0.2)', fontSize: '14px', color: '#3D2314', fontWeight: 500 }}>
+            ✓ Stripe account connected — you're set up to receive payments!
+          </div>
+        )}
+        {stripeParam === 'incomplete' && (
+          <div style={{ marginBottom: '28px', padding: '16px 20px', borderRadius: '12px', background: 'rgba(200,150,90,0.15)', border: '1px solid rgba(200,150,90,0.4)', fontSize: '14px', color: '#8B5E2A', fontWeight: 500 }}>
+            ⚠ Your Stripe setup isn't complete yet. Click "Finish setup" below to continue.
+          </div>
+        )}
+        {stripeParam === 'error' && (
+          <div style={{ marginBottom: '28px', padding: '16px 20px', borderRadius: '12px', background: 'rgba(139,37,0,0.08)', border: '1px solid rgba(139,37,0,0.2)', fontSize: '14px', color: '#8B2500', fontWeight: 500 }}>
+            Something went wrong with Stripe. Please try connecting again.
+          </div>
+        )}
+
         <div style={{ fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#C8965A', marginBottom: '12px' }}>
           ● Your dashboard
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '20px', flexWrap: 'wrap', marginBottom: '48px' }}>
+        <div className="dash-header">
           <div>
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '42px', fontWeight: 500, color: '#3D2314', marginBottom: '8px' }}>
               Welcome back, {creator.name || user.email}
             </h1>
             <p style={{ fontSize: '14px', color: '#7A4A2E' }}>{user.email}</p>
           </div>
-          <a href="/dashboard/upload" style={{ padding: '12px 22px', borderRadius: '100px', background: '#3D2314', color: '#FAF6F0', textDecoration: 'none', fontSize: '13px', fontWeight: 500 }}>
-            Upload new product
+          <a href="/dashboard/upload" style={{ padding: '12px 22px', borderRadius: '100px', background: '#3D2314', color: '#FAF6F0', textDecoration: 'none', fontSize: '13px', fontWeight: 500, whiteSpace: 'nowrap' }}>
+            + Upload product
           </a>
         </div>
 
-        {/* Stats Row */}
-        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '48px' }}>
+        {/* Stats */}
+        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '48px' }}>
+          {[
+            { label: 'Total earnings', value: '$0.00' },
+            { label: 'This month', value: '$0.00' },
+            { label: 'Total sales', value: '0' },
+            { label: 'Total products', value: String(totalProducts) },
+          ].map(stat => (
+            <div key={stat.label} style={{ padding: '24px', borderRadius: '16px', background: '#fff', border: '1px solid rgba(61,35,20,0.12)' }}>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: '#7A4A2E', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>{stat.label}</div>
+              <div style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 600, color: '#3D2314' }}>{stat.value}</div>
+            </div>
+          ))}
+        </section>
+
+        {/* Payments / Stripe Connect */}
+        <section style={{ marginBottom: '48px' }}>
+          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 500, color: '#3D2314', marginBottom: '20px' }}>Payments</h2>
           <div style={{ padding: '24px', borderRadius: '16px', background: '#fff', border: '1px solid rgba(61,35,20,0.12)' }}>
-            <div style={{ fontSize: '12px', fontWeight: 600, color: '#7A4A2E', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>Total earnings</div>
-            <div style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 600, color: '#3D2314' }}>${stats.total_earnings.toFixed(2)}</div>
-          </div>
-          <div style={{ padding: '24px', borderRadius: '16px', background: '#fff', border: '1px solid rgba(61,35,20,0.12)' }}>
-            <div style={{ fontSize: '12px', fontWeight: 600, color: '#7A4A2E', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>This month</div>
-            <div style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 600, color: '#3D2314' }}>${stats.this_month_earnings.toFixed(2)}</div>
-          </div>
-          <div style={{ padding: '24px', borderRadius: '16px', background: '#fff', border: '1px solid rgba(61,35,20,0.12)' }}>
-            <div style={{ fontSize: '12px', fontWeight: 600, color: '#7A4A2E', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>Total sales</div>
-            <div style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 600, color: '#3D2314' }}>{stats.total_sales}</div>
-          </div>
-          <div style={{ padding: '24px', borderRadius: '16px', background: '#fff', border: '1px solid rgba(61,35,20,0.12)' }}>
-            <div style={{ fontSize: '12px', fontWeight: 600, color: '#7A4A2E', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>Total products</div>
-            <div style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 600, color: '#3D2314' }}>{stats.total_products}</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                  <div style={{ fontSize: '16px', fontWeight: 500, color: '#3D2314' }}>
+                    {stripeConnected ? 'Stripe account connected' : stripeIncomplete ? 'Stripe setup incomplete' : 'Connect Stripe to get paid'}
+                  </div>
+                  {stripeConnected && (
+                    <span style={{ padding: '2px 10px', borderRadius: '100px', fontSize: '11px', fontWeight: 600, background: 'rgba(61,35,20,0.08)', color: '#3D2314' }}>
+                      ✓ Active
+                    </span>
+                  )}
+                </div>
+                <div style={{ fontSize: '13px', color: '#7A4A2E' }}>
+                  {stripeConnected
+                    ? 'Your payouts are enabled. You will receive your earnings after each sale.'
+                    : stripeIncomplete
+                    ? 'You started setup but didn\'t finish. Complete it so you can receive payments.'
+                    : 'Connect your bank account through Stripe so you receive money when products sell.'}
+                </div>
+              </div>
+              {!stripeConnected && (
+                <ConnectStripeButton label={stripeIncomplete ? 'Finish setup' : 'Connect Stripe'} />
+              )}
+            </div>
           </div>
         </section>
 
-        {/* My Products */}
+        {/* Products */}
         <section style={{ marginBottom: '48px' }}>
           <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 500, color: '#3D2314', marginBottom: '20px' }}>My products</h2>
           {products && products.length > 0 ? (
-            <div style={{ display: 'grid', gap: '16px' }}>
+            <div style={{ display: 'grid', gap: '12px' }}>
               {products.map((product) => (
-                <div key={product.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px', borderRadius: '12px', background: '#fff', border: '1px solid rgba(61,35,20,0.12)' }}>
+                <div key={product.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px', borderRadius: '12px', background: '#fff', border: '1px solid rgba(61,35,20,0.12)', gap: '12px', flexWrap: 'wrap' }}>
                   <div>
-                    <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 500, color: '#3D2314', marginBottom: '4px' }}>{product.title}</div>
-                    <div style={{ fontSize: '13px', color: '#7A4A2E' }}>{product.category.replace(/_/g, ' ')} • ${(product.price / 100).toFixed(2)} • {product.is_published ? 'Published' : 'Draft'}</div>
+                    <div style={{ fontFamily: 'Georgia, serif', fontSize: '17px', fontWeight: 500, color: '#3D2314', marginBottom: '4px' }}>{product.title}</div>
+                    <div style={{ fontSize: '13px', color: '#7A4A2E' }}>
+                      {product.category.replace(/_/g, ' ')} · ${(product.price / 100).toFixed(2)} ·{' '}
+                      <span style={{ color: product.is_published ? '#3D2314' : '#C8965A', fontWeight: 500 }}>
+                        {product.is_published ? 'Published' : 'Draft'}
+                      </span>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <button style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid rgba(61,35,20,0.22)', background: 'transparent', color: '#3D2314', cursor: 'pointer', fontSize: '12px' }}>Edit</button>
-                    <button style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid rgba(61,35,20,0.22)', background: 'transparent', color: '#8B2500', cursor: 'pointer', fontSize: '12px' }}>Delete</button>
-                  </div>
+                  <a href={`/product/${product.id}`} style={{ fontSize: '12px', color: '#7A4A2E', textDecoration: 'none', padding: '6px 14px', border: '1px solid rgba(61,35,20,0.22)', borderRadius: '8px' }}>
+                    View listing
+                  </a>
                 </div>
               ))}
             </div>
@@ -159,33 +219,11 @@ export default async function DashboardPage() {
         </section>
 
         {/* Subscription */}
-        <section style={{ marginBottom: '48px' }}>
+        <section>
           <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 500, color: '#3D2314', marginBottom: '20px' }}>Your seller subscription</h2>
           <div style={{ padding: '24px', borderRadius: '16px', background: '#fff', border: '1px solid rgba(61,35,20,0.12)' }}>
-            <div>
-              <div style={{ fontSize: '16px', fontWeight: 500, color: '#3D2314', marginBottom: '4px' }}>$9.99/month</div>
-              <div style={{ fontSize: '13px', color: '#7A4A2E' }}>
-                All sellers pay this fee. Buyers pay nothing.
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Stripe Account */}
-        <section>
-          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 500, color: '#3D2314', marginBottom: '20px' }}>Payments</h2>
-          <div style={{ padding: '24px', borderRadius: '16px', background: '#fff', border: '1px solid rgba(61,35,20,0.12)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div>
-                <div style={{ fontSize: '16px', fontWeight: 500, color: '#3D2314', marginBottom: '4px' }}>
-                  {creator.stripe_account_id ? 'Stripe account connected' : 'Connect Stripe account'}
-                </div>
-                <div style={{ fontSize: '13px', color: '#7A4A2E' }}>
-                  {creator.stripe_account_id ? 'Your Stripe account is set up to receive payments.' : 'Connect your Stripe account to start receiving payments from sales.'}
-                </div>
-              </div>
-              {!creator.stripe_account_id && <ConnectStripeButton />}
-            </div>
+            <div style={{ fontSize: '16px', fontWeight: 500, color: '#3D2314', marginBottom: '4px' }}>$9.99/month</div>
+            <div style={{ fontSize: '13px', color: '#7A4A2E' }}>All sellers pay this fee. Buyers pay nothing.</div>
           </div>
         </section>
       </div>
